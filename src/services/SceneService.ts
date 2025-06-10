@@ -14,6 +14,7 @@ import {
     Vector3
 } from "@babylonjs/core";
 import "@babylonjs/loaders/glTF/2.0";
+import {Debug} from "@babylonjs/core/Legacy/legacy";
 
 export class SceneService {
     canvasEl;
@@ -41,6 +42,7 @@ export class SceneService {
 
     showDebugLayer() {
         this.scene.debugLayer.show();
+        new Debug.AxesViewer(this.scene, 100);
     }
 
     getScene() {
@@ -104,8 +106,8 @@ export class SceneService {
 
             // Центрирование модели
             const boundingInfo = model.getHierarchyBoundingVectors();
-            const center = boundingInfo.min.add(boundingInfo.max).scale(0.5);
-            model.position = center.scale(-1);
+            // const center = boundingInfo.min.add(boundingInfo.max).scale(0.5);
+            // model.position = center.scale(-1);
 
             // Автоматическая настройка камеры под размер модели
             const radius = boundingInfo.max.subtract(boundingInfo.min).length() * 0.5;

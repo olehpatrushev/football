@@ -1,6 +1,10 @@
 import {Animatable, Mesh, Animation, Vector3} from "@babylonjs/core";
 
 export class Tracer {
+    static SIDE_LEFT = 'left';
+    static SIDE_CENTER = 'center';
+    static SIDE_RIGHT = 'right';
+
     animation: Animation;
     animatable: Animatable;
     ball: Mesh;
@@ -11,7 +15,7 @@ export class Tracer {
         this.animation = animation;
     }
 
-    getAnimation() {
+    getAnimation(): Animation {
         return this.animation;
     }
 
@@ -19,7 +23,7 @@ export class Tracer {
         this.animatable = animatable;
     }
 
-    getAnimatable() {
+    getAnimatable(): Animatable {
         return this.animatable;
     }
 
@@ -27,7 +31,7 @@ export class Tracer {
         this.ball = ball;
     }
 
-    getBall() {
+    getBall(): Mesh {
         return this.ball;
     }
 
@@ -35,7 +39,7 @@ export class Tracer {
         this.trail = trail;
     }
 
-    getTrail() {
+    getTrail(): Mesh {
         return this.trail;
     }
 
