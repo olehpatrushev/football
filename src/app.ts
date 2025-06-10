@@ -21,7 +21,7 @@ tracerService.createTracer();
 [Tracer.SIDE_CENTER, Tracer.SIDE_LEFT, Tracer.SIDE_RIGHT].forEach((side) => {
     for (let i = 0; i < 10; i++) {
         let from = Math.floor(Math.random() * 50);
-        let to = from + Math.floor(Math.random() * 50);
+        let to = from + Math.floor(Math.random() * 49) + 1;
         tracerService.createTracer(from, to, side);
     }
 })

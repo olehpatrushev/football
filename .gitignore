@@ -1,6 +1,5 @@
 .idea
-public/models/football2.glb
-public/models/football2.glb.manifest_
+football2.glb
 football.blend
 football.blend1
 node_modules

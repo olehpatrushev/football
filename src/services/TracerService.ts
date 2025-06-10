@@ -34,7 +34,7 @@ export class TracerService {
         toLine = Math.abs(parseInt(String(toLine)));
 
         if (isNaN(fromLine) || isNaN(toLine) || toLine <= fromLine) {
-            throw new Error("Invalid parameters are given");
+            throw new Error(`Invalid parameters are given: fromLine=${fromLine}, toLine=${toLine}`);
         }
 
         const tracer = new Tracer();

@@ -92,7 +92,7 @@ export class SceneService {
 
         // Загрузка модели
         try {
-            const result = await ImportMeshAsync("models/football2.glb", this.scene);
+            const result = await ImportMeshAsync("models/football.glb", this.scene);
             const model = result.meshes[0];
 
             // Получаем список анимаций
