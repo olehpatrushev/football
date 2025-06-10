@@ -7,7 +7,7 @@ import {
     Vector3,
     Scene,
     BoundingBox,
-    StandardMaterial, Color3
+    StandardMaterial, Color3, Material
 } from "@babylonjs/core";
 
 export class TracerService {
@@ -101,7 +101,10 @@ export class TracerService {
     renderTracers() {
         this.tracers.forEach((tracer: Tracer) => {
             if (tracer.getTrail()) {
-                this.scene.removeMesh(tracer.getTrail());
+                const trail = tracer.getTrail();
+                this.scene.removeMesh(trail, true);
+                trail.dispose(false, true);
+                tracer.setTrail(null);
             }
             const masterFrame = tracer.getAnimatable().masterFrame;
             const pointsCount = tracer.getPoints().length;
@@ -117,6 +120,7 @@ export class TracerService {
                 const material = new StandardMaterial("tracerMaterial", this.scene);
                 material.diffuseColor = Color3.FromHexString("#00ff00");
                 material.emissiveColor = Color3.FromHexString("#00ff00");
+                material.needDepthPrePass = true;
                 trail.material = material;
                 tracer.setTrail(trail);
             }
@@ -126,9 +130,13 @@ export class TracerService {
     removeTracers() {
         while (this.tracers.length > 0) {
             const tracer = this.tracers.shift();
+            const trail = tracer.getTrail();
+            const ball = tracer.getBall();
             tracer.getAnimatable().stop();
-            this.scene.removeMesh(tracer.getBall());
-            this.scene.removeMesh(tracer.getTrail());
+            this.scene.removeMesh(ball, true);
+            this.scene.removeMesh(trail, true);
+            trail.dispose(false, true);
+            ball.dispose(false, true);
         }
     }
 }
