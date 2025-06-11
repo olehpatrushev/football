@@ -1,5 +1,5 @@
 export class RouterService {
-    urlParams;
+    private urlParams;
 
     constructor() {
         this.urlParams = new URLSearchParams(window.location.search);

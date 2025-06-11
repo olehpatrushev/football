@@ -1,8 +1,8 @@
 import {RouterService} from "./services/RouterService";
 import {SceneService} from "./services/SceneService";
-import {TracerService} from "./services/TracerService";
 import "@babylonjs/inspector";
 import {Tracer} from "./entities/Tracer";
+import {TracerServiceFactory} from "./services/TracerServiceFactory";
 
 const routerService = new RouterService();
 
@@ -10,15 +10,17 @@ const sceneService = new SceneService(
     document.getElementById("renderCanvas"),
     document.getElementById("loadingScreen")
 );
+
 await sceneService.init();
 if (routerService.getIsDEBUG()) {
     sceneService.showDebugLayer();
 }
 
-const tracerService = new TracerService(sceneService.getScene());
-tracerService.createTracer();
+const tracerService = TracerServiceFactory.create({
+    scene: sceneService.getScene()
+});
 
-[Tracer.SIDE_CENTER, Tracer.SIDE_LEFT, Tracer.SIDE_RIGHT].forEach((side) => {
+[Tracer.SIDE_CENTER].forEach((side) => {
     for (let i = 0; i < 10; i++) {
         let from = Math.floor(Math.random() * 50);
         let to = from + Math.floor(Math.random() * 49) + 1;

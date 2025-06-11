@@ -1,37 +1,22 @@
-import {Animatable, Mesh, Animation, Vector3} from "@babylonjs/core";
+import {Mesh, Vector3} from "@babylonjs/core";
+import {AnimatableMesh} from "../core/AnimatableMesh";
 
 export class Tracer {
     static SIDE_LEFT = 'left';
     static SIDE_CENTER = 'center';
     static SIDE_RIGHT = 'right';
 
-    animation: Animation;
-    animatable: Animatable;
-    ball: Mesh;
+    ball: AnimatableMesh;
+    startLabel: AnimatableMesh;
+    endLabel: AnimatableMesh;
     trail: Mesh;
-    points: Vector3[]
+    points: Vector3[];
 
-    setAnimation(animation: Animation) {
-        this.animation = animation;
-    }
-
-    getAnimation(): Animation {
-        return this.animation;
-    }
-
-    setAnimatable(animatable: Animatable) {
-        this.animatable = animatable;
-    }
-
-    getAnimatable(): Animatable {
-        return this.animatable;
-    }
-
-    setBall(ball: Mesh) {
+    setBall(ball: AnimatableMesh) {
         this.ball = ball;
     }
 
-    getBall(): Mesh {
+    getBall(): AnimatableMesh {
         return this.ball;
     }
 
@@ -49,5 +34,31 @@ export class Tracer {
 
     getPoints() {
         return this.points;
+    }
+
+    setStartLabel(startLabel: AnimatableMesh) {
+        this.startLabel = startLabel;
+    }
+
+    getStartLabel(): AnimatableMesh {
+        return this.startLabel;
+    }
+
+    setEndLabel(endLabel: AnimatableMesh) {
+        this.endLabel = endLabel;
+    }
+
+    getEndLabel(): AnimatableMesh {
+        return this.endLabel;
+    }
+
+    destroy() {
+        debugger;
+        // const trail = tracer.getTrail();
+        // const ball = tracer.getBall().destroy();
+        // this.scene.removeMesh(ball.getMesh(), true);
+        // this.scene.removeMesh(trail, true);
+        // trail.dispose(false, true);
+        // ball.getMesh().dispose(false, true);
     }
 }

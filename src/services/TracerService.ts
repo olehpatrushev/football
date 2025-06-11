@@ -1,99 +1,110 @@
 import {Tracer} from "../entities/Tracer";
 import {
-    Animation,
-    CreateSphere,
     MeshBuilder,
     Tools,
     Vector3,
     Scene,
     BoundingBox,
-    StandardMaterial, Color3, Material
+    StandardMaterial, Color3, Material, Texture
 } from "@babylonjs/core";
+import {AnimatableMesh} from "../core/AnimatableMesh";
+import {PointsCreatorInterface} from "./tracer/PointsCreatorInterface";
+import {BallCreatorInterface} from "./tracer/BallCreatorInterface";
+import {BallCreatorOptionsInterface} from "./tracer/BallCreatorOptionsInterface";
+import {PointsCreatorOptionsInterface} from "./tracer/PointsCreatorOptionsInterface";
+import {LabelCreatorOptionsInterface} from "./tracer/LabelCreatorOptionsInterface";
+import {LabelCreatorInterface} from "./tracer/LabelCreatorInterface";
 
 export class TracerService {
-    scene: Scene;
-    tracers: Tracer[] = [];
+    private readonly scene: Scene;
 
-    leftFrontPointOfTheField: Vector3 = new Vector3(-28.7526, -8.50535, 18.3178);
-    rightRearPointOfTheField: Vector3 = new Vector3(30.6383, -8.50535, -16.6845);
+    private tracers: Tracer[] = [];
 
-    fieldBoundingBox: BoundingBox;
-    scaleCoefficient;
+    private leftFrontPointOfTheField: Vector3 = new Vector3(-28.7526, -8.50535, 18.3178);
+    private rightRearPointOfTheField: Vector3 = new Vector3(30.6383, -8.50535, -16.6845);
 
-    constructor(scene: Scene) {
-        this.scene = scene
+    private fieldBoundingBox: BoundingBox;
+    private readonly scaleCoefficient;
+    private readonly fieldWidth;
+
+    private readonly ballCreator: BallCreatorInterface;
+    private readonly pointsCreator: PointsCreatorInterface;
+    private readonly labelCreator: LabelCreatorInterface;
+
+    constructor(
+        scene: Scene,
+        pointsCreator: PointsCreatorInterface,
+        ballCreator: BallCreatorInterface,
+        labelCreator: LabelCreatorInterface
+    ) {
+        this.scene = scene;
+        this.ballCreator = ballCreator;
+        this.pointsCreator = pointsCreator;
+        this.labelCreator = labelCreator;
+
         this.scene.onBeforeRenderObservable.add(() => {
             this.renderTracers();
         });
-        this.fieldBoundingBox = new BoundingBox(this.leftFrontPointOfTheField, this.rightRearPointOfTheField);
+
+        this.fieldBoundingBox = new BoundingBox(this.rightRearPointOfTheField, this.leftFrontPointOfTheField);
+        this.fieldWidth = this.fieldBoundingBox.extendSize.scale(2).z;
         this.scaleCoefficient = 100 / Math.abs(this.fieldBoundingBox.extendSize.scale(2).x);
+    }
+
+    createBall(options: BallCreatorOptionsInterface): AnimatableMesh {
+        return this.ballCreator.create(options);
+    }
+
+    createPoints(options: PointsCreatorOptionsInterface): Vector3[] {
+        return this.pointsCreator.create(options);
+    }
+
+    createLabel(options: LabelCreatorOptionsInterface): AnimatableMesh {
+        return this.labelCreator.create(options);
     }
 
     createTracer(fromLine: number = 0, toLine: number = 100, side: string = Tracer.SIDE_CENTER) {
         fromLine = Math.abs(parseInt(String(fromLine)));
         toLine = Math.abs(parseInt(String(toLine)));
 
+        const fps = 60;
+
         if (isNaN(fromLine) || isNaN(toLine) || toLine <= fromLine) {
             throw new Error(`Invalid parameters are given: fromLine=${fromLine}, toLine=${toLine}`);
         }
 
         const tracer = new Tracer();
-        const ball = CreateSphere("ball", {diameter: 1}, this.scene);
-        ball.isVisible = false;
-        tracer.setBall(ball);
-
-        // Motion parameters
-        const gravity = -9.81;
-        const angle = Tools.ToRadians(45);
-        const range = toLine - fromLine;
-        const velocity = Math.sqrt(range * -gravity / Math.sin(2 * angle));
-        const duration = range / (velocity * Math.cos(angle)); // seconds
-        const fps = 60;
-        const frameCount = duration * fps;
-        const points = [];
-        const randomCorrection = (5 - Math.random() * 10)
-
-        for (let i = 0; i < frameCount; i++) {
-            const t = i / fps;
-            const x = velocity * Math.cos(angle) * t;
-            const y = velocity * Math.sin(angle) * t + 0.5 * gravity * t * t;
-            let realZ;
-            switch (side) {
-                case Tracer.SIDE_LEFT:
-                    realZ = 0;
-                    break;
-                case Tracer.SIDE_RIGHT:
-                    realZ = this.fieldBoundingBox.extendSize.z * 2;
-                    break;
-                default:
-                    realZ = this.fieldBoundingBox.extendSize.z;
-                    break;
-            }
-            points.push(
-                this.leftFrontPointOfTheField.clone().add(
-                    new Vector3(
-                        (x + fromLine) / this.scaleCoefficient,
-                        y / this.scaleCoefficient,
-                        realZ + randomCorrection
-                    )
-                )
-            );
-        }
-
+        const points = this.createPoints({
+            toLine,
+            fromLine,
+            fieldWidth: this.fieldWidth,
+            side,
+            basePoint: this.rightRearPointOfTheField,
+            scaleCoefficient: this.scaleCoefficient,
+            fps
+        });
         tracer.setPoints(points);
 
-        // Animation
-        const animation: Animation = new Animation("ballMove", "position", fps,
-            Animation.ANIMATIONTYPE_VECTOR3,
-            Animation.ANIMATIONLOOPMODE_CYCLE);
+        const ball = this.createBall({
+            scene: this.scene,
+            fps,
+            points
+        });
+        tracer.setBall(ball);
 
-        const keys = points.map((p, i) => ({frame: i, value: p}));
-        animation.setKeys(keys);
-        ball.animations.push(animation);
-        const animatable = this.scene.beginAnimation(ball, 0, keys[keys.length - 1].frame, true);
+        const startLabel = this.createLabel({
+            scene: this.scene,
+            fps,
+            position: points[0]
+        });
+        tracer.setStartLabel(startLabel);
 
-        tracer.setAnimation(animation);
-        tracer.setAnimatable(animatable);
+        const endLabel = this.createLabel({
+            scene: this.scene,
+            fps,
+            position: points.slice(-1)[0]
+        });
+        tracer.setEndLabel(endLabel);
 
         this.tracers.push(tracer);
     }
@@ -106,7 +117,7 @@ export class TracerService {
                 trail.dispose(false, true);
                 tracer.setTrail(null);
             }
-            const masterFrame = tracer.getAnimatable().masterFrame;
+            const masterFrame = Math.floor(tracer.getBall().getAnimatable().masterFrame);
             const pointsCount = tracer.getPoints().length;
             const maxTrailLength = Math.floor(pointsCount / 6);
             const trailLength = Math.min(maxTrailLength, masterFrame, pointsCount - masterFrame);
@@ -118,8 +129,7 @@ export class TracerService {
                     tessellation: 6
                 }, this.scene);
                 const material = new StandardMaterial("tracerMaterial", this.scene);
-                material.diffuseColor = Color3.FromHexString("#00ff00");
-                material.emissiveColor = Color3.FromHexString("#00ff00");
+                material.diffuseColor = material.emissiveColor = Color3.FromHexString("#00ff00");
                 material.needDepthPrePass = true;
                 trail.material = material;
                 tracer.setTrail(trail);
@@ -130,13 +140,7 @@ export class TracerService {
     removeTracers() {
         while (this.tracers.length > 0) {
             const tracer = this.tracers.shift();
-            const trail = tracer.getTrail();
-            const ball = tracer.getBall();
-            tracer.getAnimatable().stop();
-            this.scene.removeMesh(ball, true);
-            this.scene.removeMesh(trail, true);
-            trail.dispose(false, true);
-            ball.dispose(false, true);
+            tracer.destroy();
         }
     }
 }

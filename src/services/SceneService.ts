@@ -17,10 +17,10 @@ import "@babylonjs/loaders/glTF/2.0";
 import {Debug} from "@babylonjs/core/Legacy/legacy";
 
 export class SceneService {
-    canvasEl;
-    loadingScreenEl;
-    engine;
-    scene;
+    private canvasEl;
+    private loadingScreenEl;
+    private engine;
+    private scene;
 
     constructor(canvasEl, loadingScreenEl) {
         this.canvasEl = canvasEl;
