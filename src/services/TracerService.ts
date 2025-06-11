@@ -12,7 +12,7 @@ import {PointsCreatorInterface} from "./tracer/PointsCreatorInterface";
 import {BallCreatorInterface} from "./tracer/BallCreatorInterface";
 import {BallCreatorOptionsInterface} from "./tracer/BallCreatorOptionsInterface";
 import {PointsCreatorOptionsInterface} from "./tracer/PointsCreatorOptionsInterface";
-import {LabelCreatorOptionsInterface} from "./tracer/LabelCreatorOptionsInterface";
+import {LABEL_TYPE_FIRST, LABEL_TYPE_LAST, LabelCreatorOptionsInterface} from "./tracer/LabelCreatorOptionsInterface";
 import {LabelCreatorInterface} from "./tracer/LabelCreatorInterface";
 
 export class TracerService {
@@ -95,15 +95,21 @@ export class TracerService {
         const startLabel = this.createLabel({
             scene: this.scene,
             fps,
-            position: points[0]
+            position: points[0],
+            totalFrames: points.length,
+            type: LABEL_TYPE_FIRST
         });
+        startLabel.getAnimatable().syncWith(ball.getAnimatable());
         tracer.setStartLabel(startLabel);
 
         const endLabel = this.createLabel({
             scene: this.scene,
             fps,
-            position: points.slice(-1)[0]
+            position: points.slice(-1)[0],
+            totalFrames: points.length,
+            type: LABEL_TYPE_LAST
         });
+        endLabel.getAnimatable().syncWith(ball.getAnimatable());
         tracer.setEndLabel(endLabel);
 
         this.tracers.push(tracer);

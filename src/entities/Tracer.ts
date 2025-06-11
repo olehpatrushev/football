@@ -52,13 +52,13 @@ export class Tracer {
         return this.endLabel;
     }
 
-    destroy() {
-        debugger;
-        // const trail = tracer.getTrail();
-        // const ball = tracer.getBall().destroy();
-        // this.scene.removeMesh(ball.getMesh(), true);
-        // this.scene.removeMesh(trail, true);
-        // trail.dispose(false, true);
-        // ball.getMesh().dispose(false, true);
+    destroy(): void {
+        this.getBall().destroy();
+        this.getStartLabel().destroy();
+        this.getEndLabel().destroy();
+
+        const trail = this.getTrail();
+        trail?.getScene()?.removeMesh(trail, true);
+        trail?.dispose(false, true);
     }
 }

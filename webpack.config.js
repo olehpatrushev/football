@@ -39,6 +39,7 @@ module.exports = {
         new CopyWebpackPlugin({
             patterns: [
                 {from: 'public/models/football.glb', to: 'models/football.glb'}, // копирует всё из public в dist
+                {from: 'public/images', to: 'images'}, // копирует всё из public в dist
             ],
         }),
     ],

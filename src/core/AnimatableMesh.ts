@@ -28,4 +28,11 @@ export class AnimatableMesh {
     getMesh(): Mesh {
         return this.mesh;
     }
+
+    destroy(): void {
+        const mesh = this.getMesh();
+        mesh.getScene()?.removeMesh(mesh, true);
+        mesh.dispose(false, true);
+        this.getAnimatable().stop();
+    }
 }
